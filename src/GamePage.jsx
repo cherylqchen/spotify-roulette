@@ -1,41 +1,93 @@
 import { useLocation } from 'react-router-dom'
-import { useRef } from "react";
+import { useEffect, useState, useRef } from 'react'
 import Header from "./components/Header.jsx"
 import MusicPlayer from './MusicPlayer.jsx';
 
 export default function GamePage() {
+    console.log('Rerendered GamePage');
     const location = useLocation();
     const tracks = location.state?.tracks || [];
-    const track = tracks[Math.floor(Math.random() * tracks.length)];
+    const selected = tracks[Math.floor(Math.random() * tracks.length)];
 
-    function findButton() {
-        console.log(document.querySelectorAll('button'))
+    const [track, setTrack] = useState(selected);
+    const [preview, setPreview] = useState(null);
+    //let preview = 
+    console.log('track: ', track);
+
+    useEffect(() => {
+        fetchSongFromAppleMusic(track.name, track.artist).then(data => {
+            console.log('fetched from itunes: ', data);
+            setPreview(data);
+        }
+        );
+    }, [track]);
+
+    const fetchSongFromAppleMusic = async (song, artist) => {
+        const url = `https://itunes.apple.com/search?term=${encodeURIComponent(song + " " + artist)}&media=music&limit=1`;
+        console.log('itunes url: ', url);
+
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            if (data.results.length > 0) {
+                return data.results[0].previewUrl; // 30-sec preview link
+            } else {
+                console.error("No song found.");
+                return null;
+            }
+        } catch (error) {
+            console.error("Error fetching song:", error);
+            return null;
+        }
+    };
+    
+    function getNewTrack() {
+        const song = tracks[Math.floor(Math.random() * tracks.length)];
+        setTrack(song);
     }
 
     return (
     <>
-        <Header />
-        <p>Your song is: {track.name} by {track.artist}</p>
+        <Header />      
+
+        {preview ?
+            <MusicPlayer url={preview} title={track.name} artist={track.artist} correct={getNewTrack} />
+            :
+            <p>Getting playback...</p>
+        }
+        
+    </>
+    )
+    
+}
+
+/*
+
+
+<p>Your song is: {track.name} by {track.artist}</p>
         <iframe
             src={`https://open.spotify.com/embed/track/${track.id}`}
             width="300"
             height="380"
             frameBorder="0"
             allow="encrypted-media"
-            autoplay
         ></iframe>
 
-    <audio id="custom-audio-player" controls>
-    <source src="TRACK_PREVIEW_URL" type="audio/mp3" />
-    Your browser does not support the audio element.
-    </audio>
 
-        <button onClick={findButton}>▶ Play</button>
-    </>
-    )
-}
+{preview ?
+            <audio id="custom-audio-player" controls>
+                <source src={preview} type="audio/mp3" />
+                Your browser does not support the audio element.
+            </audio>
+            :
+            <p>Getting playback...</p>
+        }
 
-/*
+
+
+
+{preview && <MusicPlayer url={preview}/> } <--- separate thing that could also be good
 
 <MusicPlayer trackID={track.id} />
 
