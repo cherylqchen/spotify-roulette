@@ -12,7 +12,7 @@ export default function LandingPage() {
         if (!playlistLink) return;
         
         try {
-            const response = await fetch('http://localhost:5000/get-playlist-tracks', {
+            const response = await fetch('http://localhost:5001/get-playlist-tracks', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ playlistUrl: playlistLink }),

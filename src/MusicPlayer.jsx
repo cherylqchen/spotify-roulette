@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useMemo, useEffect, useLayoutEffect, useRef, useState } from "react";
 import WaveSurfer from "wavesurfer.js";
 
 const MusicPlayer = ({ url, title, artist, correct }) => {
@@ -10,11 +10,27 @@ const MusicPlayer = ({ url, title, artist, correct }) => {
   const [guess, setGuess] = useState("");
   const [guessed, setGuessed] = useState(false);
   const [quit, setQuit] = useState(false);
+  const [playerReady, setPlayerReady] = useState(false)
 
-  useEffect(() => {
+  useMemo(() => {
     setGuess("");
     setGuessed(false);
     setQuit(false);
+    setPlayerReady(false);
+    // wavesurfer.current.destroy();
+  }, [title])
+
+  useMemo(() => {
+    if (wavesurfer.current && !playerReady) wavesurfer.current.destroy()
+  }, [playerReady])
+
+  console.log('reset all states')
+
+  useEffect(() => {
+    console.log('running useeffect')
+    /* setGuess("");
+    setGuessed(false);
+    setQuit(false); */
 
     wavesurfer.current = WaveSurfer.create({
       container: waveformRef.current,
@@ -33,7 +49,9 @@ const MusicPlayer = ({ url, title, artist, correct }) => {
     wavesurfer.current.load(url);
 
     wavesurfer.current.on("ready", () => {
+      console.log('wavesurfer loaded')
       setIsPlaying(false);
+      setPlayerReady(true)
     });
 
     wavesurfer.current.on("finish", () => {
@@ -41,7 +59,7 @@ const MusicPlayer = ({ url, title, artist, correct }) => {
     });
 
     return () => {
-      wavesurfer.current.destroy();
+      //wavesurfer.current.destroy();
       wavesurfer.current.un("finish");
     }
   }, [url]);
@@ -79,13 +97,14 @@ const MusicPlayer = ({ url, title, artist, correct }) => {
   return (
     <div className="gamePlayer" style={{textAlign: "center"}}>
 
+
       <div className="wave-container">
         <div ref={waveformRef}></div>
       </div>
       
       <div className="controls">
-
-        {(!guessed && !quit) && 
+        {console.log('player ready: ', playerReady)}
+        {(!guessed && !quit && playerReady) && 
         <>
           <button onClick={togglePlay} className="playBtn"> {isPlaying ? "⏸️" : "▶️"} </button>
           <input type="text" placeholder="Guess song title" className="guesser gameBtn" onChange={handleGuess} value={guess} />
@@ -93,7 +112,7 @@ const MusicPlayer = ({ url, title, artist, correct }) => {
         </>}
       </div>
 
-
+      {console.log('quit = ', quit, ' guessed = ', guessed)}
       {(quit || guessed) && 
       <>
         <p className="reveal">{quit && "So close... "} {guessed && "Great job! "} the correct answer was <b>{title} by {artist}</b></p>

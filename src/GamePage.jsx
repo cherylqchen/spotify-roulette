@@ -43,8 +43,10 @@ export default function GamePage() {
     };
     
     function getNewTrack() {
+        console.log('getNewTrack() called')
         const song = tracks[Math.floor(Math.random() * tracks.length)];
         setTrack(song);
+        console.log('got new track')
     }
 
     return (

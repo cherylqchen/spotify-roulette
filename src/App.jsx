@@ -11,7 +11,7 @@ function App() {
     useEffect(() => {
       console.log('Ran useEffect()')
 
-      fetch('http://localhost:5000/get-token')
+      fetch('http://localhost:5001/get-token')
         .then(res => res.json())
         .then(data => {
             setToken(data.access_token)
