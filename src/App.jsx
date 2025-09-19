@@ -5,7 +5,8 @@ import LandingPage from './LandingPage.jsx'
 import GamePage from './GamePage.jsx'
 
 function App() {
-  console.log('App rendered');
+  document.title = "Spotify Roulette"
+  console.log('App rendered')
   const [token, setToken] = useState('')
 
     useEffect(() => {
